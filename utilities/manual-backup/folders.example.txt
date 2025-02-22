@@ -1,0 +1,12 @@
+Program Files (x86)/Steam
+ProgramData
+Users/ReplaceWithUserName/AppData/Local
+Users/ReplaceWithUserName/AppData/LocalLow
+Users/ReplaceWithUserName/AppData/Roaming
+Users/ReplaceWithUserName/Desktop
+Users/ReplaceWithUserName/Documents/My Games
+Users/ReplaceWithUserName/Games
+Users/ReplaceWithUserName/Pictures
+Users/ReplaceWithUserName/Saved Games
+Users/Default/AppData
+Users/Default/Pictures
