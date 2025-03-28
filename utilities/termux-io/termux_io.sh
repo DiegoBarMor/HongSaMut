@@ -1,11 +1,6 @@
 #!/bin/bash
 
-this_root="$(pwd)"
-folder_io=$(echo $0 | cut -d'/' -f 1)
-termux_root="/data/data/com.termux/files/home"
-do_backup_when_unpacking=true
-
-# Function to display usage
+### Function to display usage
 usage() {
     echo "Usage: termux_io.sh [OPTION]"
     echo "Options:"
@@ -15,13 +10,17 @@ usage() {
     echo "  -h, --help      Display this help and exit"
 }
 
-# Check for mandatory flag
+### Check for mandatory flag
 if [[ $# -lt 1 ]]; then
     usage
     exit 1
 fi
 
-# Parse command line arguments
+### Default values
+termux_root="/data/data/com.termux/files/home"
+do_backup_when_unpacking=true
+
+### Parse command line arguments
 while [[ "$#" -gt 0 ]]; do
     case "$1" in
         -p|--pack)
@@ -47,7 +46,16 @@ while [[ "$#" -gt 0 ]]; do
     esac
 done
 
-# Set folder paths based on environment
+### Check if the script is run from the correct directory
+this_root="$(pwd)"
+dir_script="$(dirname "$(realpath "$0")")"
+
+if [[ "$this_root" != "$dir_script" ]]; then
+    echo "Error: Script must be run from its residing directory: $dir_script"
+    exit 1
+fi
+
+### Set folder paths based on environment
 if [[ "$this_root" == "$termux_root" ]]; then
     folder_io="$this_root/storage/shared/TermuxIO"
 else
@@ -55,13 +63,14 @@ else
 fi
 
 mkdir -p $folder_io
-this_root="$termux_root/.termux/.."
+mkdir -p .termux
+this_root="$this_root/.termux/.."
 path_current="$this_root/current_termux.txt"
 
 ts="$(date +%Y%m%d_%H%M%S)"
 paths_to_backup="$this_root/Desktop $this_root/.config $this_root/.termux"
 
-# Perform the selected operation
+### Perform the selected operation
 if [[ "$operation" == "pack" ]]; then
     path_tar="$folder_io/$ts.tar.gz"
     echo "$ts" > "$path_current"
