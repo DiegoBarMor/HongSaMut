@@ -10,6 +10,11 @@ sudo apt install micro tmux
 sudo apt install vlc
 
 
+### CLONE REPOSITORIES
+git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+# git clone https://github.com/DiegoBarMor/HongSaMut ~/.hongsamut
+
+
 ### DEPLOY SSH
 mkdir -p ~/.ssh
 cp "$ROOT/kwamlap/ssh/config" ~/.ssh/
@@ -21,12 +26,10 @@ chmod 600 ~/.ssh/diegobm.pub
 
 ### DEPLOY CONFIGS
 bindle_local=~/Desktop/bindle
-hongsamut=~/.hongsamut
 kwamlap=~/.kwamlap
 
-rm -rf "$bindle_local" "$hongsamut" "$kwamlap"
-cp -r "$ROOT/../"       "$bindle_local"
-cp -r "$ROOT/kwamlap"   "$kwamlap"
-cp -r "$ROOT/hongsamut" "$hongsamut"
+rm -rf "$bindle_local" "$kwamlap"
+cp -r "$ROOT/../"      "$bindle_local"
+cp -r "$ROOT/kwamlap"  "$kwamlap"
 
 ./deploy_configs.sh
