@@ -1,4 +1,8 @@
 #!/bin/bash
+set -euo pipefail
+
+##### TODO: review this utility
+
 if [[ $# -eq 0 ]]; then
   echo "No arguments supplied, exiting..."
   exit 1
@@ -6,6 +10,7 @@ fi
 
 folder_root_in=$1  # e.g. /mnt/c
 folder_root_out=$2 # e.g. /mnt/d/backup
+path_folders_list=$3 # e.g. folders/example.txt
 
 ### Remove trailing slash from paths (if they exist)
 folder_root_in=${folder_root_in%/}
@@ -42,6 +47,6 @@ while read foldername; do
     fi
 
     echo "Backing up $path_in to $path_out"
-    tar -czf "$path_out" "$path_in"
+    tar -czvf "$path_out" "$path_in"
 
-done < folders.txt
+done < "$path_folders_list"

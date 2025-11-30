@@ -1,8 +1,10 @@
-# Easy transfer of Termux content between devices
+# File syncing
 
-## Setup
+## TermuxIO: Easy transfer of Termux content between devices
 
-### Android
+### Setup
+
+#### Android
 1) Install Termux from F-Droid. Run the app.
 2) Run the following in the console:
 ```
@@ -17,10 +19,9 @@ mv storage/shared/TermuxIO/termux_io.sh termux_io.sh
 ```
 5) `termux_io.sh` (and Termux in general) is now ready to use.
 
-### PC
+#### PC
 1) Place the `termux_io.sh` script inside any folder. Create a subdirectory called `TermuxIO` inside said folder.
 2) `termux_io.sh` is now ready to use.
 
-
-## Usage
+### Usage
 WIP

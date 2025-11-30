@@ -4,6 +4,7 @@ from pathlib import Path
 
 def parse_log(log):
     dates = []
+    hours = []
     authors = []
     messages = []
     waiting_message = True
@@ -11,8 +12,10 @@ def parse_log(log):
         if not line: continue
 
         if line.startswith("Date:"):
-            date = line[5:].strip()
+            date_hour = line[5:].strip()
+            date,hour = date_hour.split('-')
             dates.append(date)
+            hours.append(hour)
             waiting_message = True
 
         elif line.startswith("Author:"):
@@ -28,7 +31,7 @@ def parse_log(log):
                 messages[-1] += "[NEWLINE]" + message
 
 
-    return dates, authors, messages
+    return dates, hours, authors, messages
 
 
 FOLDER_ROOT = Path(sys.argv[1])
@@ -38,7 +41,7 @@ PATH_OUT = FOLDER_CWD / "repos.csv"
 
 print(f"Inspecting {FOLDER_ROOT}...")
 
-data = {"date": [], "repo": [], "author" : [], "message": []}
+data = {"date": [], "hour": [], "repo": [], "author" : [], "message": []}
 path_repos = [FOLDER_ROOT / git.parent for git in FOLDER_ROOT.rglob("*.git/")]
 
 for path_repo in path_repos:
@@ -56,15 +59,16 @@ for path_repo in path_repos:
     with open(PATH_TMP, 'r') as file:
         log = file.read()
 
-    dates, authors, messages = parse_log(log)
+    dates, hours, authors, messages = parse_log(log)
     repos = [path_short for _ in authors]
     data["date"].extend(dates)
+    data["hour"].extend(hours)
     data["repo"].extend(repos)
     data["author"].extend(authors)
     data["message"].extend(messages)
 
 
 df = pd.DataFrame(data)
-df.sort_values(by = ["date"], ascending = False, inplace = True)
+df.sort_values(by = ["date", "hour"], ascending = False, inplace = True)
 df.to_csv(PATH_OUT, index = False)
 os.remove(PATH_TMP)

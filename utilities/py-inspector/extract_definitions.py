@@ -1,3 +1,5 @@
+##### TODO: review this utility
+
 import re, sys, json
 from pathlib import Path
 
@@ -22,7 +24,7 @@ if __name__ == "__main__":
     definitions = {}
     for path_py in FOLDER_IN.glob("**/*.py"):
         with open(path_py, 'r') as file:
-            lines = file.readlines()
+            lines = [line.split('#')[0] for line in file.readlines()]
 
         current_class = ''
         current_func = ''
@@ -66,8 +68,7 @@ if __name__ == "__main__":
                 continue
 
             ##### GLOBAL VARIABLES
-            match = re.match(r"^(\w+)\s*=(?!.*=).*", line) # this catches only global variables
-            # match = re.match(r"^\s*(\w+)\s*=(?!.*=).*", line) # this catches all variables, global and local
+            match = re.match(r"^(\w+)\s*=(?!.*=).*", line) # assumes (only) global variables start with no indentation
             if match:
                 var = match.group(1)
                 data = ("glo", i, var)

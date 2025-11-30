@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# VERSION: 2025.07.05
+
 ### Function to display usage
 usage() {
     echo "Usage: termux_io.sh [OPTION]"
@@ -68,7 +70,7 @@ this_root="$this_root/.termux/.."
 path_current="$this_root/current_termux.txt"
 
 ts="$(date +%Y%m%d_%H%M%S)"
-paths_to_backup="$this_root/Desktop $this_root/.config $this_root/.termux"
+paths_to_backup="$this_root/Desktop $this_root/CulebraTermux $this_root/.config $this_root/.termux"
 
 ### Perform the selected operation
 if [[ "$operation" == "pack" ]]; then
