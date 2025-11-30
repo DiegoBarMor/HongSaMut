@@ -1,6 +1,11 @@
+.vscode
+desktop.ini
+
 utilities/manual-backup/folders/*
 !utilities/manual-backup/folders/example.txt
 
 utilities/py-inspector/data/
 
 utilities/git-summary/repos.csv
+
+utilities/wanderer/configs
