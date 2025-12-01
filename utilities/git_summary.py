@@ -34,10 +34,10 @@ def parse_log(log):
     return dates, hours, authors, messages
 
 
-FOLDER_ROOT = Path(sys.argv[1])
-FOLDER_CWD = Path(os.getcwd())
-PATH_TMP = FOLDER_CWD / "log.tmp"
-PATH_OUT = FOLDER_CWD / "repos.csv"
+FOLDER_ROOT = Path(sys.argv[1]).resolve()
+FOLDER_OUT = Path(sys.argv[2]).resolve() if (len(sys.argv) >= 3) else None
+
+PATH_TMP = FOLDER_ROOT / "log.tmp"
 
 print(f"Inspecting {FOLDER_ROOT}...")
 
@@ -48,7 +48,7 @@ for path_repo in path_repos:
     path_absolute = path_repo.resolve()
     path_short = path_repo.relative_to(FOLDER_ROOT)
 
-    status = os.system(f"cd {path_absolute}; git log --date=format-local:'%Y/%m/%d-%H:%M:%S' > {PATH_TMP} 2>&1")
+    status = os.system(f"cd {path_absolute} && git log --date=format-local:'%Y/%m/%d-%H:%M:%S' > {PATH_TMP} 2>&1")
 
     if status != 0:
         print(f"XXX Error: {path_short} is not a git repository.")
@@ -67,8 +67,20 @@ for path_repo in path_repos:
     data["author"].extend(authors)
     data["message"].extend(messages)
 
+os.remove(PATH_TMP)
 
 df = pd.DataFrame(data)
 df.sort_values(by = ["date", "hour"], ascending = False, inplace = True)
-df.to_csv(PATH_OUT, index = False)
-os.remove(PATH_TMP)
+
+if FOLDER_OUT is None:
+    try:
+        path_tmp = FOLDER_ROOT / "repos.csv.tmp"
+        df.to_csv(path_tmp, index = False)
+        from prisma_csv import TUIPrismaCSV
+        tui = TUIPrismaCSV(path_tmp)
+        tui.run()
+    finally:
+        os.remove(path_tmp)
+
+else:
+    df.to_csv(FOLDER_OUT / "repos.csv", index = False)

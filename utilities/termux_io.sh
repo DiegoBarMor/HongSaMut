@@ -1,6 +1,9 @@
 #!/bin/bash
 
-# VERSION: 2025.07.05
+# VERSION: 2025.12.01
+
+### TODO: Generalize. Currently only works with specific directory structures / accompanying scripts.
+### Do not use yet via the hongsamut function until generalized.
 
 ### Function to display usage
 usage() {
@@ -64,7 +67,7 @@ else
     folder_io="$this_root/TermuxIO"
 fi
 
-mkdir -p $folder_io
+mkdir -p "$folder_io"
 mkdir -p .termux
 this_root="$this_root/.termux/.."
 path_current="$this_root/current_termux.txt"

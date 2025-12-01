@@ -7,6 +7,6 @@ utilities/manual-backup/folders/*
 
 utilities/py-inspector/data/
 
-utilities/git-summary/repos.csv
+utilities/repos.csv
 
 utilities/wanderer/configs
