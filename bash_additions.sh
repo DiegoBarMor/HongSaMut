@@ -117,6 +117,10 @@ hongsamut() { # FUNC: main command for HongSaMut utilities; calls the utilities 
                 bash "$folder_utils/termux_io.sh" "${@:2}"
                 return 0
                 ;;
+            copygit|copysel|copyselssh)
+                bash "$folder_utils/sync_utils.sh" "$1" "${@:2}"
+                return 0
+                ;;
             -h|--help)
                 usage
                 return 0
