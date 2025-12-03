@@ -5,7 +5,7 @@
 alias editbash='micro ~/.hongsamut/bash_additions.sh ~/.bash_extra'
 alias funcs='_funcs # display custom functions, similar to calling alias'
 alias snek='source ~/miniconda3/etc/profile.d/conda.sh; conda activate' # envname can be provided afterward e.g. "snek prisma" activates the "prisma" env
-
+alias nosnek='conda deactivate'
 
 
 ################################### FUNCTIONS ##################################
@@ -59,6 +59,24 @@ showcolors() { # FUNC: display the 256 available colors
 cdl() { # FUNC: change current directory and display all its contents
     local path="${1:-.}"
     cd "$path" && la
+}
+
+lsdeep() { # FUNC: list all files and directories from the specified directory. Display head and tail for every file. List contents for every subdirectory.
+    local path="${1:-.}"
+    children=$(ls -A1 "$path")
+    for child in $children; do
+        if [ -d "$path/$child" ]; then
+            echo "==> Directory: $child <=="
+            ls -Ap1 "$path/$child"
+            echo
+        elif [ -f "$path/$child" ]; then
+            echo "==> File: $child <=="
+            head -n 5 "$path/$child"
+            echo "..."
+            tail -n 5 "$path/$child"
+            echo
+        fi
+    done
 }
 
 wanderoff() { # FUNC: packup configs and other stuff into a "bindle", ready to deploy to fresh Ubuntu installs (using "unpack.sh" in the bindle folder)
