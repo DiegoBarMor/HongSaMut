@@ -1,16 +1,46 @@
 #!/usr/bin/env bash
 
+############################### GLOBAL VARIABLES ###############################
+
+editor="micro"
+visual="micro"
+
+
+############################ ENVIRONMENT VARIABLES #############################
+
+export EDITOR=$editor
+export SUDO_EDITOR=$editor
+export VISUAL=$visual
+
+
+### TERMUX
+# export MANPAGER="less -R --use-color -Dd+g -Du+b" # Colored man
+# alias grep='grep --color=auto'
+
+################################ AUTOCOMPLETION ################################
+
+# bind 'TAB:menu-complete' # cycle through all matches with 'TAB' key
+shopt -s extglob # necessary for programmable completion
+shopt -s autocd # cd when entering just a path
+
+
 ################################### ALIASES ####################################
 
-alias editbash='micro ~/.hongsamut/bash_additions.sh ~/.bash_extra'
-alias funcs='_funcs # display custom functions, similar to calling alias'
+alias xaddons='$EDITOR ~/.hongsamut/bash_additions.sh # edit bash additions'
+# alias editbash='$EDITOR ~/.hongsamut/bash_additions.sh ~/.bash_extra'
+alias addons='_addons # display customizations from bash additions'
 alias snek='source ~/miniconda3/etc/profile.d/conda.sh; conda activate' # envname can be provided afterward e.g. "snek prisma" activates the "prisma" env
 alias nosnek='conda deactivate'
+
+# shellcheck disable=SC2139
+alias e="$editor"
+alias p="python3"
+alias mk="mkdir -vp"
 
 
 ################################### FUNCTIONS ##################################
 
-_funcs() { # FUNC: displays the functions present in ~/.hongsamut/bash_additions.sh
+_addons() { # FUNC: displays the functions present in ~/.hongsamut/bash_additions.sh
     parse_file() {
         regex='^(\s*alias\s+.+=.*)|(.+\(\s*\)\s*\{\s*#\s*FUNC.*)$'
         while IFS= read -r line; do
@@ -39,7 +69,7 @@ dutree() { # FUNC: calls 'du' and 'tree' with the following arguments: path, mag
     tree -a --filelimit "$filelimit" "$path"
 }
 
-tmuxreset() { # FUNC: kills tmux server and restarts it by calling tmux-resurrect
+tmuxreset() { # FUNC: (currently has some issues) kills tmux server and restarts it by calling tmux-resurrect
     tmux kill-server
     rm -rf /tmp/tmux*
     tmux new-session -d
@@ -51,9 +81,24 @@ tmuxreset() { # FUNC: kills tmux server and restarts it by calling tmux-resurrec
 }
 
 showcolors() { # FUNC: display the 256 available colors
-    for i in {0..255} ; do
-        printf "\x1b[38;5;%smcolour%s\n" "${i}" "${i}"
+    echo "Standard 8 ANSI colors (foreground):"
+    for code in {30..37}; do
+        printf "\e[%sm%3s\e[0m  " "$code" "$code"
     done
+    echo -e "\nBright ANSI colors (foreground):"
+    for code in {90..97}; do
+        printf "\e[%sm%3s\e[0m  " "$code" "$code"
+    done
+    echo -e "\n"
+
+    echo "256-color palette (foreground):"
+    for i in {0..255}; do
+        printf "\x1b[38;5;%sm%3s\x1b[0m " "$i" "$i"
+        if (( (i + 1) % 16 == 0 )); then
+            echo
+        fi
+    done
+    echo
 }
 
 cdl() { # FUNC: change current directory and display all its contents
@@ -61,21 +106,63 @@ cdl() { # FUNC: change current directory and display all its contents
     cd "$path" && la
 }
 
+cpinto() { # FUNC: copy directory with 'cp -r' and cd into it
+    if [[ $# -lt 2 ]]; then
+        echo "Usage: cpinto <source> <destination>"
+        return 1
+    fi
+    src="${1}"
+    dest="${2}"
+
+    if [ ! -d "$src" ]; then
+        echo "Source '$src' is not a directory."
+        return 2
+    fi
+    cp -r "$@"
+    cd "$dest" || return 1
+}
+
+mkinto() { # FUNC: make directory and cd into it
+    if [[ $# -lt 1 ]]; then
+        echo "Usage: mkinto <directory>"
+        return 1
+    fi
+    mkdir -p "$1" && cd "$1" || return 1
+}
+
 lsdeep() { # FUNC: list all files and directories from the specified directory. Display head and tail for every file. List contents for every subdirectory.
     local path="${1:-.}"
     children=$(ls -A1 "$path")
+    color_file='\e[93m' # bright yellow
+    color_dir='\e[94m' # bright blue
     for child in $children; do
         if [ -d "$path/$child" ]; then
-            echo "==> Directory: $child <=="
-            ls -Ap1 "$path/$child"
-            echo
+            echo -e "==> Directory: $color_dir$child\e[0m <=="
+            # contents=$(ls -Ap1 "$path/$child")
+            # ncontents=$(ls -1 "$path/$child" | wc -l)
+            ncontents=$(find . -maxdepth 1 | wc -l | wc -l)
+            if (( ncontents > 25 )); then
+                # echo $contents # WIP
+                ls -Ap1 "$path/$child"
+            else
+                # echo $contents
+                ls -Ap1 "$path/$child"
+            fi
+
         elif [ -f "$path/$child" ]; then
-            echo "==> File: $child <=="
-            head -n 5 "$path/$child"
-            echo "..."
-            tail -n 5 "$path/$child"
-            echo
+            echo -e "==> File: $color_file$child\e[0m <=="
+            nlines=$(cat "$path/$child" | wc -l)
+            if (( nlines > 10 )); then
+                head -n 5 "$path/$child"
+                echo -e "$color_file...\e[0m"
+                tail -n 5 "$path/$child"
+            else
+                cat "$path/$child"
+            fi
+
+
         fi
+        echo
     done
 }
 
@@ -109,6 +196,9 @@ hongsamut() { # FUNC: main command for HongSaMut utilities; calls the utilities 
         echo "                          If specified, outputs a CSV to 'out'/repos.csv (default: don't save, open in CSV viewer instead)."
         echo "                          Requires Python packages: pandas"
         echo "  termuxio [options]      Pack or unpack Termux configuration and data (see 'termuxio --help' for details)"
+        echo "  copygit [src] [dest]    ..."
+        echo "  copysel [options]       ..."
+        echo "  copyselssh [options]    ..."
         echo
         echo "Options:"
         echo "  -h, --help              Show this help message and exit"
@@ -161,3 +251,5 @@ fi
 
 
 ################################################################################
+### SOURCES:
+### https://github.com/knightfall-cs/termux-bashrc/blob/main/bash.bashrc

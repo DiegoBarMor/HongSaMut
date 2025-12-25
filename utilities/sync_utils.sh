@@ -43,6 +43,9 @@ copy_git() {
   # convert to newline-separated list for rsync (does not handle filenames with newlines)
   tr '\0' '\n' < "$tmp_z" > "$tmp_nl"
 
+  # Add the .git directory contents in the list for rsync
+  echo $(cd "$SRC"; tree .git -if --noreport) | tr ' ' '\n' >> "$tmp_nl"
+
   # Sync files listed from SRC -> DST (preserve paths)
   # --relative not strictly necessary if files are relative, but keeps path structure safe
   rsync -a --files-from="$tmp_nl" --relative "$SRC"/ "$DST"/
