@@ -179,6 +179,29 @@ lsdeep() { # FUNC: list all files and directories from the specified directory. 
     done
 }
 
+boiler() { # FUNC: create a boilerplate file at the specified path, based on the file extension
+    local path="${1}"
+    if [ -z "$path" ]; then
+        echo "Usage: boiler <file_path>"
+        return 1
+    fi
+
+    folder_boilers=~/.hongsamut/boilerplate
+    ext="${path##*.}"
+    case "$ext" in
+        sh)
+            cp "$folder_boilers/script.sh" "$path"
+            ;;
+        py)
+            cp "$folder_boilers/main.py" "$path"
+            ;;
+        *)
+            echo "No boilerplate available for extension: .$ext"
+            return 2
+            ;;
+    esac
+}
+
 wanderoff() { # FUNC: packup configs and other stuff into a "bindle", ready to deploy to fresh Ubuntu installs (using "unpack.sh" in the bindle folder)
     set -eu
     bindle=~/Desktop/bindle
