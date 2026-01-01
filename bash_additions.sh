@@ -40,6 +40,21 @@ alias mk="mkdir -vp"
 
 ################################### FUNCTIONS ##################################
 
+coloransi() { # FUNC: print text in ANSI color; args: text, short_code (0-7), do_bright (0/1). 0: black, 1: red, 2: green, 3: yellow, 4: blue, 5: magenta, 6: cyan, 7: white
+    text="${1:-Sample Text}"
+    short_code="${2:-1}"
+    do_bright="${3:-1}"
+
+    if [[ $do_bright -eq 1 ]]; then
+        shift=90
+    else
+        shift=30
+    fi
+
+    code=$((short_code+shift))
+    printf "\e[%sm%s\e[0m" "$code" "$text"
+}
+
 _addons() { # FUNC: displays the functions present in ~/.hongsamut/bash_additions.sh
     parse_file() {
         regex='^(\s*alias\s+.+=.*)|(.+\(\s*\)\s*\{\s*#\s*FUNC.*)$'
@@ -48,9 +63,7 @@ _addons() { # FUNC: displays the functions present in ~/.hongsamut/bash_addition
             func_name=$(echo "$line" | cut -d'#' -f1)
             func_desc=$(echo "$line" | cut -d'#' -f2-)
             func_desc="${func_desc#*FUNC}"
-            echo "$func_name"
-            echo "    $func_desc"
-            echo
+            echo -e "$(coloransi "$func_name")\n    $func_desc\n"
           fi
         done < "$1"
     }
@@ -82,12 +95,12 @@ tmuxreset() { # FUNC: (currently has some issues) kills tmux server and restarts
 
 showcolors() { # FUNC: display the 256 available colors
     echo "Standard 8 ANSI colors (foreground):"
-    for code in {30..37}; do
-        printf "\e[%sm%3s\e[0m  " "$code" "$code"
+    for code in {0..7}; do # 30..37
+        coloransi "$((code+30))  " "$code" 0
     done
     echo -e "\nBright ANSI colors (foreground):"
-    for code in {90..97}; do
-        printf "\e[%sm%3s\e[0m  " "$code" "$code"
+    for code in {0..7}; do # 90..97
+        coloransi "$((code+90))  " "$code" 1
     done
     echo -e "\n"
 
@@ -133,11 +146,11 @@ mkinto() { # FUNC: make directory and cd into it
 lsdeep() { # FUNC: list all files and directories from the specified directory. Display head and tail for every file. List contents for every subdirectory.
     local path="${1:-.}"
     children=$(ls -A1 "$path")
-    color_file='\e[93m' # bright yellow
-    color_dir='\e[94m' # bright blue
+    color_file=3 # yellow
+    color_dir=4 # blue
     for child in $children; do
         if [ -d "$path/$child" ]; then
-            echo -e "==> Directory: $color_dir$child\e[0m <=="
+            echo -e "==> Directory: $(coloransi "$child" $color_dir) <=="
             # contents=$(ls -Ap1 "$path/$child")
             # ncontents=$(ls -1 "$path/$child" | wc -l)
             ncontents=$(find . -maxdepth 1 | wc -l | wc -l)
@@ -150,11 +163,11 @@ lsdeep() { # FUNC: list all files and directories from the specified directory. 
             fi
 
         elif [ -f "$path/$child" ]; then
-            echo -e "==> File: $color_file$child\e[0m <=="
+            echo -e "==> File: $(coloransi "$child" $color_file) <=="
             nlines=$(cat "$path/$child" | wc -l)
             if (( nlines > 10 )); then
                 head -n 5 "$path/$child"
-                echo -e "$color_file...\e[0m"
+                echo "$(coloransi "..." $color_file) "
                 tail -n 5 "$path/$child"
             else
                 cat "$path/$child"
@@ -195,7 +208,7 @@ hongsamut() { # FUNC: main command for HongSaMut utilities; calls the utilities 
         echo "  gitsummary [root] [out] Aggregate git logs for repos in the specified 'root' folder (default: current directory)"
         echo "                          If specified, outputs a CSV to 'out'/repos.csv (default: don't save, open in CSV viewer instead)."
         echo "                          Requires Python packages: pandas"
-        echo "  termuxio [options]      Pack or unpack Termux configuration and data (see 'termuxio --help' for details)"
+        # echo "  termuxio [options]      Pack or unpack Termux configuration and data (see 'termuxio --help' for details)"
         echo "  copygit [src] [dest]    ..."
         echo "  copysel [options]       ..."
         echo "  copyselssh [options]    ..."
@@ -221,10 +234,10 @@ hongsamut() { # FUNC: main command for HongSaMut utilities; calls the utilities 
                 python3 "$folder_utils/git_summary.py" "${2:-.}" "${@:3}"
                 return 0
                 ;;
-            termuxio)
-                bash "$folder_utils/termux_io.sh" "${@:2}"
-                return 0
-                ;;
+            # termuxio)
+            #     bash "$folder_utils/termux_io.sh" "${@:2}"
+            #     return 0
+            #     ;;
             copygit|copysel|copyselssh)
                 bash "$folder_utils/sync_utils.sh" "$1" "${@:2}"
                 return 0
