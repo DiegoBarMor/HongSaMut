@@ -4,11 +4,10 @@ set -eu
 ROOT=$(dirname "$(realpath "$0")")
 
 ### INSTALL BASIC STUFF
-sudo apt install git make cmake
+sudo apt install git gcc clang make cmake
 sudo apt install tree htop btop
-sudo apt install micro tmux
-sudo apt install vlc
-
+sudo apt install micro tmux lynx
+sudo apt install vlc pandoc
 
 ### CLONE REPOSITORIES
 git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm

@@ -13,8 +13,12 @@ export SUDO_EDITOR=$editor
 export VISUAL=$visual
 
 
-### TERMUX
 # export MANPAGER="less -R --use-color -Dd+g -Du+b" # Colored man
+# export MANPAGER='less -s -M +Gg' # Percentages added to man
+export MANPAGER="less -R --use-color -Dd+g -Du+b -s -M +Gg"
+export GROFF_NO_SGR=1 # for konsole and gnome-terminal
+
+### [TEMP] TERMUX
 # alias grep='grep --color=auto'
 
 ################################ AUTOCOMPLETION ################################
@@ -26,9 +30,7 @@ shopt -s autocd # cd when entering just a path
 
 ################################### ALIASES ####################################
 
-alias xaddons='$EDITOR ~/.hongsamut/bash_additions.sh # edit bash additions'
-# alias editbash='$EDITOR ~/.hongsamut/bash_additions.sh ~/.bash_extra'
-alias addons='_addons # display customizations from bash additions'
+alias xaddons='$EDITOR ~/.hongsamut/bash_additions.sh # ~/.bash_extra'
 alias snek='source ~/miniconda3/etc/profile.d/conda.sh; conda activate' # envname can be provided afterward e.g. "snek prisma" activates the "prisma" env
 alias nosnek='conda deactivate'
 
@@ -36,6 +38,9 @@ alias nosnek='conda deactivate'
 alias e="$editor"
 alias p="python3"
 alias mk="mkdir -vp"
+
+alias manc="man libc" # overview of standard C libraries
+alias rmpycache="find -name __pycache__ -exec rm -rf {} \;"
 
 
 ################################### FUNCTIONS ##################################
@@ -55,7 +60,7 @@ coloransi() { # FUNC: print text in ANSI color; args: text, short_code (0-7), do
     printf "\e[%sm%s\e[0m" "$code" "$text"
 }
 
-_addons() { # FUNC: displays the functions present in ~/.hongsamut/bash_additions.sh
+addons() { # FUNC: displays the functions present in ~/.hongsamut/bash_additions.sh
     parse_file() {
         regex='^(\s*alias\s+.+=.*)|(.+\(\s*\)\s*\{\s*#\s*FUNC.*)$'
         while IFS= read -r line; do
@@ -112,6 +117,17 @@ showcolors() { # FUNC: display the 256 available colors
         fi
     done
     echo
+}
+
+explorer() { # FUNC: open file explorer at specified path (UBUNTU NAUTILUS)
+    local path="${1:-.}"
+    nautilus --browser "$path"
+
+}
+
+rendermd() {
+    local path="${1:-.}"
+	pandoc "$path" | lynx -stdin
 }
 
 cdl() { # FUNC: change current directory and display all its contents
@@ -289,3 +305,5 @@ fi
 ################################################################################
 ### SOURCES:
 ### https://github.com/knightfall-cs/termux-bashrc/blob/main/bash.bashrc
+### https://wiki.archlinux.org/index.php/Color_output_in_console#man
+### https://stackoverflow.com/a/19871578/5353461
