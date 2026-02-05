@@ -10,7 +10,9 @@ sudo apt install micro tmux lynx
 sudo apt install vlc pandoc
 
 ### CLONE REPOSITORIES
-git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+if [[ ! -e ~/.tmux/plugins/tpm ]]; then
+	git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+fi
 # git clone https://github.com/DiegoBarMor/HongSaMut ~/.hongsamut
 
 
@@ -27,8 +29,12 @@ chmod 600 ~/.ssh/diegobm.pub
 bindle_local=~/Desktop/bindle
 kwamlap=~/.kwamlap
 
-rm -rf "$bindle_local" "$kwamlap"
-cp -r "$ROOT/../"      "$bindle_local"
+if [[ "$bindle_local" != "$ROOT" ]]; then
+	rm -rf "$bindle_local"
+	cp -r "$ROOT/../"      "$bindle_local"
+fi
+
+rm -rf "$kwamlap"
 cp -r "$ROOT/kwamlap"  "$kwamlap"
 
 ./deploy_configs.sh

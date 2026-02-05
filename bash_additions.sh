@@ -38,6 +38,7 @@ alias nosnek='conda deactivate'
 alias e="$editor"
 alias p="python3"
 alias mk="mkdir -vp"
+alias ts="$(date +%Y%m%d_%H%M%S)"
 
 alias manc="man libc" # overview of standard C libraries
 alias rmpycache="find -name __pycache__ -exec rm -rf {} \;"
@@ -119,15 +120,43 @@ showcolors() { # FUNC: display the 256 available colors
     echo
 }
 
+rendermd() { # FUNC: render Markdown files using pandoc and lynx
+    local path="${1:-.}"
+	pandoc "$path" | lynx -stdin
+}
+
+_shortcut_files() {
+    local name="${1}"
+    local cmd="${2}"
+    local ext="${3}"
+    local location="${4}"
+    local path="$location/$name.$ext"
+
+    if [ -z "$name" ] || [ ! -e "$path" ]; then
+        cd "$location"
+        echo "Usage: $cmd <file_stem>"
+        echo "Available options:"        
+        echo "$(coloransi "$(ls *.$ext | xargs -L1 basename --suffix=.$ext)" 3)"
+        cd - >/dev/null
+        return 1
+    fi
+
+	# rendermd "$path"
+	$editor "$path"
+}
+
+snippets() { # FUNC: open snippets from hongsamut
+    _shortcut_files "${1}" "snippets" md "$(realpath ~/".hongsamut/snippets")" 
+}
+
+guides() { # FUNC: open guides from hongsamut
+    _shortcut_files "${1}" "guides" md "$(realpath ~/".hongsamut/guides")" 
+}
+
 explorer() { # FUNC: open file explorer at specified path (UBUNTU NAUTILUS)
     local path="${1:-.}"
     nautilus --browser "$path"
 
-}
-
-rendermd() {
-    local path="${1:-.}"
-	pandoc "$path" | lynx -stdin
 }
 
 cdl() { # FUNC: change current directory and display all its contents
@@ -245,7 +274,7 @@ hongsamut() { # FUNC: main command for HongSaMut utilities; calls the utilities 
         echo "Commands:"
         echo "  prismacsv files...      Open CSV viewer for specified files. Requires Python packages: pandas, prisma-tui"
         echo "  gitsummary [root] [out] Aggregate git logs for repos in the specified 'root' folder (default: current directory)"
-        echo "                          If specified, outputs a CSV to 'out'/repos.csv (default: don't save, open in CSV viewer instead)."
+        echo "                          If specified, outputs a CSV to 'out'/repos.csv (default: don't save, view with prismacsv instead)."
         echo "                          Requires Python packages: pandas"
         # echo "  termuxio [options]      Pack or unpack Termux configuration and data (see 'termuxio --help' for details)"
         echo "  copygit [src] [dest]    ..."
