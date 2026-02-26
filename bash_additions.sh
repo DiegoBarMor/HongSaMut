@@ -30,9 +30,12 @@ shopt -s autocd # cd when entering just a path
 
 ################################### ALIASES ####################################
 
-alias xaddons='$EDITOR ~/.hongsamut/bash_additions.sh # ~/.bash_extra'
-alias snek='source ~/miniconda3/etc/profile.d/conda.sh; conda activate' # envname can be provided afterward e.g. "snek prisma" activates the "prisma" env
-alias nosnek='conda deactivate'
+alias xaddons='$EDITOR ~/.hongsamut/bash_additions.sh # ~/.bash_extra' #
+alias snek='source ~/miniconda3/etc/profile.d/conda.sh && conda activate' # envname can be provided afterward e.g. "snek prisma" activates the "prisma" env
+alias snekls='source ~/miniconda3/etc/profile.d/conda.sh && conda env list' #
+alias snekdel='source ~/miniconda3/etc/profile.d/conda.sh && conda remove --all -y -n' #
+alias sneknew='_sneknew' # creates a new conda environment with the python3 package
+alias snekout='conda deactivate'
 
 # shellcheck disable=SC2139
 alias e="$editor"
@@ -46,6 +49,7 @@ alias rmpycache="find -name __pycache__ -exec rm -rf {} \;"
 
 ################################### FUNCTIONS ##################################
 
+################################### CORE FUNCTIONS
 coloransi() { # FUNC: print text in ANSI color; args: text, short_code (0-7), do_bright (0/1). 0: black, 1: red, 2: green, 3: yellow, 4: blue, 5: magenta, 6: cyan, 7: white
     text="${1:-Sample Text}"
     short_code="${2:-1}"
@@ -61,6 +65,34 @@ coloransi() { # FUNC: print text in ANSI color; args: text, short_code (0-7), do
     printf "\e[%sm%s\e[0m" "$code" "$text"
 }
 
+################################### PRIVATE FUNCTIONS
+_sneknew() {
+    local name="$1"
+    source ~/miniconda3/etc/profile.d/conda.sh
+    conda create -n "$name" python
+}
+
+_shortcut_files() {
+    local name="${1}"
+    local cmd="${2}"
+    local ext="${3}"
+    local location="${4}"
+    local path="$location/$name.$ext"
+
+    if [ -z "$name" ] || [ ! -e "$path" ]; then
+        cd "$location"
+        echo "Usage: $cmd <file_stem>"
+        echo "Available options:"
+        echo "$(coloransi "$(ls *.$ext | xargs -L1 basename --suffix=.$ext)" 3)"
+        cd - >/dev/null
+        return 1
+    fi
+
+    # rendermd "$path"
+    $editor "$path"
+}
+
+################################### PUBLIC FUNCTIONS
 addons() { # FUNC: displays the functions present in ~/.hongsamut/bash_additions.sh
     parse_file() {
         regex='^(\s*alias\s+.+=.*)|(.+\(\s*\)\s*\{\s*#\s*FUNC.*)$'
@@ -122,35 +154,15 @@ showcolors() { # FUNC: display the 256 available colors
 
 rendermd() { # FUNC: render Markdown files using pandoc and lynx
     local path="${1:-.}"
-	pandoc "$path" | lynx -stdin
-}
-
-_shortcut_files() {
-    local name="${1}"
-    local cmd="${2}"
-    local ext="${3}"
-    local location="${4}"
-    local path="$location/$name.$ext"
-
-    if [ -z "$name" ] || [ ! -e "$path" ]; then
-        cd "$location"
-        echo "Usage: $cmd <file_stem>"
-        echo "Available options:"        
-        echo "$(coloransi "$(ls *.$ext | xargs -L1 basename --suffix=.$ext)" 3)"
-        cd - >/dev/null
-        return 1
-    fi
-
-	# rendermd "$path"
-	$editor "$path"
+    pandoc "$path" | lynx -stdin
 }
 
 snippets() { # FUNC: open snippets from hongsamut
-    _shortcut_files "${1}" "snippets" md "$(realpath ~/".hongsamut/snippets")" 
+    _shortcut_files "${1}" "snippets" md "$(realpath ~/".hongsamut/snippets")"
 }
 
 guides() { # FUNC: open guides from hongsamut
-    _shortcut_files "${1}" "guides" md "$(realpath ~/".hongsamut/guides")" 
+    _shortcut_files "${1}" "guides" md "$(realpath ~/".hongsamut/guides")"
 }
 
 explorer() { # FUNC: open file explorer at specified path (UBUNTU NAUTILUS)
