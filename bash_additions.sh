@@ -121,11 +121,14 @@ boiler() { # FUNC: create a boilerplate file at the specified path, based on the
     folder_boilers=~/.hongsamut/boilerplate
     ext="${path##*.}"
     case "$ext" in
-        sh)
-            cp "$folder_boilers/script.sh" "$path"
+        md)
+            cp "$folder_boilers/markdown.md" "$path"
             ;;
         py)
             cp "$folder_boilers/main.py" "$path"
+            ;;
+        sh)
+            cp "$folder_boilers/script.sh" "$path"
             ;;
         *)
             echo "No boilerplate available for extension: .$ext"
