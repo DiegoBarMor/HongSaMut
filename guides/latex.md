@@ -1,3 +1,4 @@
+# LaTeX
 - Installing LaTeX in Ubuntu:
 ```bash
 sudo apt install texlive -y && sudo apt-get install dvipng texlive-latex-extra texlive-fonts-recommended cm-super -y

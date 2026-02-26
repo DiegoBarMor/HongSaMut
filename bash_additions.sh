@@ -39,12 +39,12 @@ alias snekout='conda deactivate'
 
 # shellcheck disable=SC2139
 alias e="$editor"
-alias p="python3"
-alias mk="mkdir -vp"
-alias ts="$(date +%Y%m%d_%H%M%S)"
+alias p='python3'
+alias mk='mkdir -vp'
+alias ts='$(date +%Y%m%d_%H%M%S)'
 
-alias manc="man libc" # overview of standard C libraries
-alias rmpycache="find -name __pycache__ -exec rm -rf {} \;"
+alias manc='man libc' # overview of standard C libraries
+alias rmpycache='find -name __pycache__ -exec rm -rf {} \;'
 
 
 ################################### FUNCTIONS ##################################
@@ -66,12 +66,6 @@ coloransi() { # FUNC: print text in ANSI color; args: text, short_code (0-7), do
 }
 
 ################################### PRIVATE FUNCTIONS
-_sneknew() {
-    local name="$1"
-    source ~/miniconda3/etc/profile.d/conda.sh
-    conda create -n "$name" python
-}
-
 _shortcut_files() {
     local name="${1}"
     local cmd="${2}"
@@ -92,6 +86,13 @@ _shortcut_files() {
     $editor "$path"
 }
 
+_sneknew() {
+    local name="$1"
+    # shellcheck disable=SC1090
+    source ~/miniconda3/etc/profile.d/conda.sh
+    conda create -n "$name" python
+}
+
 ################################### PUBLIC FUNCTIONS
 addons() { # FUNC: displays the functions present in ~/.hongsamut/bash_additions.sh
     parse_file() {
@@ -110,65 +111,27 @@ addons() { # FUNC: displays the functions present in ~/.hongsamut/bash_additions
     parse_file "$HOME/.bash_extra"
 }
 
-dutree() { # FUNC: calls 'du' and 'tree' with the following arguments: path, magnitude (for 'du' threshold), filelimit (for 'tree')
-    local path="${1:-.}"       # default path is current directory if not provided
-    local magnitude="${2:-6}"  # for the "du" command, magnitude of 10; default is 6 (10^6)
-    local filelimit="${3:-10}" # for the "tree" command
+boiler() { # FUNC: create a boilerplate file at the specified path, based on the file extension
+    local path="${1}"
+    if [ -z "$path" ]; then
+        echo "Usage: boiler <file_path>"
+        return 1
+    fi
 
-    local threshold=$((10 ** magnitude))
-    du -hat "$threshold" "$path"
-    tree -a --filelimit "$filelimit" "$path"
-}
-
-tmuxreset() { # FUNC: (currently has some issues) kills tmux server and restarts it by calling tmux-resurrect
-    tmux kill-server
-    rm -rf /tmp/tmux*
-    tmux new-session -d
-
-    SCRIPT_DIR="$HOME/.tmux/plugins/tmux-resurrect" # https://stackoverflow.com/questions/64995878/send-prefix-key-to-tmux-session
-    tmux send-keys -t 0:0 "$SCRIPT_DIR/scripts/restore.sh" Enter
-
-    tmux attach
-}
-
-showcolors() { # FUNC: display the 256 available colors
-    echo "Standard 8 ANSI colors (foreground):"
-    for code in {0..7}; do # 30..37
-        coloransi "$((code+30))  " "$code" 0
-    done
-    echo -e "\nBright ANSI colors (foreground):"
-    for code in {0..7}; do # 90..97
-        coloransi "$((code+90))  " "$code" 1
-    done
-    echo -e "\n"
-
-    echo "256-color palette (foreground):"
-    for i in {0..255}; do
-        printf "\x1b[38;5;%sm%3s\x1b[0m " "$i" "$i"
-        if (( (i + 1) % 16 == 0 )); then
-            echo
-        fi
-    done
-    echo
-}
-
-rendermd() { # FUNC: render Markdown files using pandoc and lynx
-    local path="${1:-.}"
-    pandoc "$path" | lynx -stdin
-}
-
-snippets() { # FUNC: open snippets from hongsamut
-    _shortcut_files "${1}" "snippets" md "$(realpath ~/".hongsamut/snippets")"
-}
-
-guides() { # FUNC: open guides from hongsamut
-    _shortcut_files "${1}" "guides" md "$(realpath ~/".hongsamut/guides")"
-}
-
-explorer() { # FUNC: open file explorer at specified path (UBUNTU NAUTILUS)
-    local path="${1:-.}"
-    nautilus --browser "$path"
-
+    folder_boilers=~/.hongsamut/boilerplate
+    ext="${path##*.}"
+    case "$ext" in
+        sh)
+            cp "$folder_boilers/script.sh" "$path"
+            ;;
+        py)
+            cp "$folder_boilers/main.py" "$path"
+            ;;
+        *)
+            echo "No boilerplate available for extension: .$ext"
+            return 2
+            ;;
+    esac
 }
 
 cdl() { # FUNC: change current directory and display all its contents
@@ -192,12 +155,24 @@ cpinto() { # FUNC: copy directory with 'cp -r' and cd into it
     cd "$dest" || return 1
 }
 
-mkinto() { # FUNC: make directory and cd into it
-    if [[ $# -lt 1 ]]; then
-        echo "Usage: mkinto <directory>"
-        return 1
-    fi
-    mkdir -p "$1" && cd "$1" || return 1
+dutree() { # FUNC: calls 'du' and 'tree' with the following arguments: path, magnitude (for 'du' threshold), filelimit (for 'tree')
+    local path="${1:-.}"       # default path is current directory if not provided
+    local magnitude="${2:-6}"  # for the "du" command, magnitude of 10; default is 6 (10^6)
+    local filelimit="${3:-10}" # for the "tree" command
+
+    local threshold=$((10 ** magnitude))
+    du -hat "$threshold" "$path"
+    tree -a --filelimit "$filelimit" "$path"
+}
+
+explorer() { # FUNC: open file explorer at specified path (UBUNTU NAUTILUS)
+    local path="${1:-.}"
+    nautilus --browser "$path"
+
+}
+
+guides() { # FUNC: open guides from hongsamut
+    _shortcut_files "${1}" "guides" md "$(realpath ~/".hongsamut/guides")"
 }
 
 lsdeep() { # FUNC: list all files and directories from the specified directory. Display head and tail for every file. List contents for every subdirectory.
@@ -236,27 +211,53 @@ lsdeep() { # FUNC: list all files and directories from the specified directory. 
     done
 }
 
-boiler() { # FUNC: create a boilerplate file at the specified path, based on the file extension
-    local path="${1}"
-    if [ -z "$path" ]; then
-        echo "Usage: boiler <file_path>"
+mkinto() { # FUNC: make directory and cd into it
+    if [[ $# -lt 1 ]]; then
+        echo "Usage: mkinto <directory>"
         return 1
     fi
+    mkdir -p "$1" && cd "$1" || return 1
+}
 
-    folder_boilers=~/.hongsamut/boilerplate
-    ext="${path##*.}"
-    case "$ext" in
-        sh)
-            cp "$folder_boilers/script.sh" "$path"
-            ;;
-        py)
-            cp "$folder_boilers/main.py" "$path"
-            ;;
-        *)
-            echo "No boilerplate available for extension: .$ext"
-            return 2
-            ;;
-    esac
+rendermd() { # FUNC: render Markdown files using pandoc and lynx
+    local path="${1:-.}"
+    pandoc "$path" | lynx -stdin
+}
+
+showcolors() { # FUNC: display the 256 available colors
+    echo "Standard 8 ANSI colors (foreground):"
+    for code in {0..7}; do # 30..37
+        coloransi "$((code+30))  " "$code" 0
+    done
+    echo -e "\nBright ANSI colors (foreground):"
+    for code in {0..7}; do # 90..97
+        coloransi "$((code+90))  " "$code" 1
+    done
+    echo -e "\n"
+
+    echo "256-color palette (foreground):"
+    for i in {0..255}; do
+        printf "\x1b[38;5;%sm%3s\x1b[0m " "$i" "$i"
+        if (( (i + 1) % 16 == 0 )); then
+            echo
+        fi
+    done
+    echo
+}
+
+snippets() { # FUNC: open snippets from hongsamut
+    _shortcut_files "${1}" "snippets" md "$(realpath ~/".hongsamut/snippets")"
+}
+
+tmuxreset() { # FUNC: (currently has some issues) kills tmux server and restarts it by calling tmux-resurrect
+    tmux kill-server
+    rm -rf /tmp/tmux*
+    tmux new-session -d
+
+    SCRIPT_DIR="$HOME/.tmux/plugins/tmux-resurrect" # https://stackoverflow.com/questions/64995878/send-prefix-key-to-tmux-session
+    tmux send-keys -t 0:0 "$SCRIPT_DIR/scripts/restore.sh" Enter
+
+    tmux attach
 }
 
 wanderoff() { # FUNC: packup configs and other stuff into a "bindle", ready to deploy to fresh Ubuntu installs (using "unpack.sh" in the bindle folder)
@@ -279,6 +280,7 @@ wanderoff() { # FUNC: packup configs and other stuff into a "bindle", ready to d
     echo "Finished packing stuff to bindle at $bindle"
 }
 
+#### [WIP] refactor this:
 hongsamut() { # FUNC: main command for HongSaMut utilities; calls the utilities via sub-commands such as "prismacsv", "gitsummary", etc.
     usage() {
         echo "Usage: hongsamut <command> [options]"
@@ -288,7 +290,6 @@ hongsamut() { # FUNC: main command for HongSaMut utilities; calls the utilities 
         echo "  gitsummary [root] [out] Aggregate git logs for repos in the specified 'root' folder (default: current directory)"
         echo "                          If specified, outputs a CSV to 'out'/repos.csv (default: don't save, view with prismacsv instead)."
         echo "                          Requires Python packages: pandas"
-        # echo "  termuxio [options]      Pack or unpack Termux configuration and data (see 'termuxio --help' for details)"
         echo "  copygit [src] [dest]    ..."
         echo "  copysel [options]       ..."
         echo "  copyselssh [options]    ..."
@@ -314,10 +315,6 @@ hongsamut() { # FUNC: main command for HongSaMut utilities; calls the utilities 
                 python3 "$folder_utils/git_summary.py" "${2:-.}" "${@:3}"
                 return 0
                 ;;
-            # termuxio)
-            #     bash "$folder_utils/termux_io.sh" "${@:2}"
-            #     return 0
-            #     ;;
             copygit|copysel|copyselssh)
                 bash "$folder_utils/sync_utils.sh" "$1" "${@:2}"
                 return 0
