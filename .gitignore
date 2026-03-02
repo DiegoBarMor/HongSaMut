@@ -1,6 +1,8 @@
 .vscode
 desktop.ini
+
 tmp/
+plugins/
 
 utilities/manual-backup/folders/*
 !utilities/manual-backup/folders/example.txt

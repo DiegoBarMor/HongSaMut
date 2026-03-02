@@ -1,17 +1,15 @@
 #!/usr/bin/env bash
 
 ############################### GLOBAL VARIABLES ###############################
-
 editor="micro"
 visual="micro"
 
 
 ############################ ENVIRONMENT VARIABLES #############################
-
 export EDITOR=$editor
 export SUDO_EDITOR=$editor
 export VISUAL=$visual
-
+export DIR_HSM=$HOME/.hongsamut # this script (i.e. the main bash_additions.sh) should be contained in this directory
 
 # export MANPAGER="less -R --use-color -Dd+g -Du+b" # Colored man
 # export MANPAGER='less -s -M +Gg' # Percentages added to man
@@ -21,34 +19,37 @@ export GROFF_NO_SGR=1 # for konsole and gnome-terminal
 ### [TEMP] TERMUX
 # alias grep='grep --color=auto'
 
-################################ AUTOCOMPLETION ################################
 
+################################ AUTOCOMPLETION ################################
 # bind 'TAB:menu-complete' # cycle through all matches with 'TAB' key
 shopt -s extglob # necessary for programmable completion
 shopt -s autocd # cd when entering just a path
 
 
-################################### ALIASES ####################################
+############################# PATHS TO HSM PLUGINS #############################
+HSMPLG_EXTRA="$DIR_HSM/plugins/extra"
+HSGPLG_TEMPLATES="$DIR_HSM/plugins/templates"
 
-alias xaddons='$EDITOR ~/.hongsamut/bash_additions.sh # ~/.bash_extra' #
+
+################################### ALIASES ####################################
+alias xaddons='$EDITOR $DIR_HSM/bash_additions.sh' #
 alias snek='source ~/miniconda3/etc/profile.d/conda.sh && conda activate' # envname can be provided afterward e.g. "snek prisma" activates the "prisma" env
 alias snekls='source ~/miniconda3/etc/profile.d/conda.sh && conda env list' #
 alias snekdel='source ~/miniconda3/etc/profile.d/conda.sh && conda remove --all -y -n' #
 alias sneknew='_sneknew' # creates a new conda environment with the python3 package
-alias snekout='conda deactivate'
+alias snekout='conda deactivate' #
 
 # shellcheck disable=SC2139
-alias e="$editor"
-alias p='python3'
-alias mk='mkdir -vp'
-alias ts='$(date +%Y%m%d_%H%M%S)'
+alias e="$editor" #
+alias p='python3' #
+alias mk='mkdir -vp' #
+alias timestamp='$(date +%Y%m%d_%H%M%S)' #
 
 alias manc='man libc' # overview of standard C libraries
-alias rmpycache='find -name __pycache__ -exec rm -rf {} \;'
+alias rmpycache='find -name __pycache__ -exec rm -rf {} \;' #
 
 
 ################################### FUNCTIONS ##################################
-
 ################################### CORE FUNCTIONS
 coloransi() { # FUNC: print text in ANSI color; args: text, short_code (0-7), do_bright (0/1). 0: black, 1: red, 2: green, 3: yellow, 4: blue, 5: magenta, 6: cyan, 7: white
     text="${1:-Sample Text}"
@@ -94,8 +95,11 @@ _sneknew() {
 }
 
 ################################### PUBLIC FUNCTIONS
-addons() { # FUNC: displays the functions present in ~/.hongsamut/bash_additions.sh
+addons() { # FUNC: displays the functions present in the bash_additions.sh files
     parse_file() {
+        if [[ ! -f "$1" ]]; then return; fi
+        echo ">>> Addons in $(coloransi "$1" 4)"
+
         regex='^(\s*alias\s+.+=.*)|(.+\(\s*\)\s*\{\s*#\s*FUNC.*)$'
         while IFS= read -r line; do
           if [[ $line =~ $regex ]]; then
@@ -105,36 +109,12 @@ addons() { # FUNC: displays the functions present in ~/.hongsamut/bash_additions
             echo -e "$(coloransi "$func_name")\n    $func_desc\n"
           fi
         done < "$1"
+        echo
     }
 
-    parse_file "$HOME/.hongsamut/bash_additions.sh"
-    parse_file "$HOME/.bash_extra"
-}
-
-boiler() { # FUNC: create a boilerplate file at the specified path, based on the file extension
-    local path="${1}"
-    if [ -z "$path" ]; then
-        echo "Usage: boiler <file_path>"
-        return 1
-    fi
-
-    folder_boilers=~/.hongsamut/boilerplate
-    ext="${path##*.}"
-    case "$ext" in
-        md)
-            cp "$folder_boilers/markdown.md" "$path"
-            ;;
-        py)
-            cp "$folder_boilers/main.py" "$path"
-            ;;
-        sh)
-            cp "$folder_boilers/script.sh" "$path"
-            ;;
-        *)
-            echo "No boilerplate available for extension: .$ext"
-            return 2
-            ;;
-    esac
+    parse_file "$DIR_HSM/bash_additions.sh"
+    parse_file "$HSGPLG_TEMPLATES/bash_additions.sh"
+    parse_file "$HSMPLG_EXTRA/bash_additions.sh"
 }
 
 cdl() { # FUNC: change current directory and display all its contents
@@ -267,8 +247,7 @@ wanderoff() { # FUNC: packup configs and other stuff into a "bindle", ready to d
     set -eu
     bindle=~/Desktop/bindle
     kwamlap=~/.kwamlap
-    hsm=~/.hongsamut
-    wanderer=$hsm/utilities/wanderer
+    wanderer=$DIR_HSM/utilities/wanderer
 
     rm -rf $bindle
     cp -r  $wanderer  $bindle
@@ -300,7 +279,7 @@ hongsamut() { # FUNC: main command for HongSaMut utilities; calls the utilities 
         echo "Options:"
         echo "  -h, --help              Show this help message and exit"
     }
-    folder_utils=~/.hongsamut/utilities
+    folder_utils=$DIR_HSM/utilities
 
     if [[ "$#" -eq 0 ]]; then
         usage
@@ -335,12 +314,15 @@ hongsamut() { # FUNC: main command for HongSaMut utilities; calls the utilities 
 }
 
 
-##################################### EXTRA ####################################
-if [[ -f ~/.bash_extra ]]; then
-    # shellcheck disable=SC1090
-    . ~/.bash_extra
+#################################### PLUGINS ###################################
+if [[ -f "$HSGPLG_TEMPLATES/bash_additions.sh" ]]; then
+    # shellcheck source=/dev/null
+    source "$HSGPLG_TEMPLATES/bash_additions.sh"
 fi
-
+if [[ -f "$HSMPLG_EXTRA/bash_additions.sh" ]]; then
+    # shellcheck source=/dev/null
+    source "$HSMPLG_EXTRA/bash_additions.sh"
+fi
 
 
 ################################################################################
