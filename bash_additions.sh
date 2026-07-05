@@ -91,7 +91,8 @@ _sneknew() {
     local name="$1"
     # shellcheck disable=SC1090
     source ~/miniconda3/etc/profile.d/conda.sh
-    conda create -n "$name" python
+    conda create -n "$name" python -y
+    conda activate "$name"
 }
 
 ################################### PUBLIC FUNCTIONS
