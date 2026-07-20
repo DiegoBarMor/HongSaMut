@@ -43,7 +43,7 @@ for i in $(eval echo "{1..$END}"); do echo $i; done
 
 # Others
 ```bash
-rm -f $folder_out/.[!.]*.npz $folder_out/.[!.]*.lock
+rm -f .[!.]*.npz .[!.]*.lock
 ```
 
 ```bash

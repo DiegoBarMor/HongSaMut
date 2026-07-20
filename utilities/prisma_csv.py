@@ -183,10 +183,10 @@ class TUIPrismaCSV(pr.Terminal):
 
         self.header.draw_matrix(0,0,chars_header,attrs_header)
         self.body.draw_matrix(0,0,chars_body, attrs_body)
-        self.footer.draw_text(0, 0, "Press F1 to exit", pr.get_color_pair(6))
+        self.footer.draw_text(0, 0, "Press q to exit", pr.get_color_pair(6))
 
     def should_stop(self):
-        return self.key == pr.KEY_F1
+        return self.key in (pr.KEY_Q_LOWER, pr.KEY_Q_UPPER)
 
 
     def _current_x(self):
