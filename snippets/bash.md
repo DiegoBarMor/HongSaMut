@@ -1,8 +1,8 @@
 - download a file:
 ```bash
-	pdb=1AKX
-	curl https://files.rcsb.org/download/$pdb.pdb.gz --output $pdb.pdb.gz
-	curl https://files.rcsb.org/download/$pdb.pdb    --output $pdb.pdb
+pdb=1AKX
+curl https://files.rcsb.org/download/$pdb.pdb.gz --output $pdb.pdb.gz
+curl https://files.rcsb.org/download/$pdb.pdb    --output $pdb.pdb
 ```
 
 - replace CRLF with LF:
@@ -13,7 +13,7 @@ find . -type f -not -path './.git*' -not -path './node_modules*' | xargs sed -i 
 
 - inspect binaries
 ```bash
-xxd -R always $path_in | less -R 
+xxd -R always $path_in | less -R
 ```
 
 - replace a substring in a line
@@ -37,7 +37,7 @@ echo ${arr[$idx]}
 - range of numbers coming from a variable
 ```bash
 nframes=100
-eval echo {1..$nframes..20} 
+eval echo {1..$nframes..20}
 for i in $(eval echo "{1..$END}"); do echo $i; done
 ```
 
